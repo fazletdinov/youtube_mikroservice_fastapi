@@ -1,0 +1,172 @@
+version: '3.9'
+
+volumes:
+  pg_data_users:
+  pg_data_video:
+    # rabbitmq_data:
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+  db_users:
+    image: postgres:15.1-alpine
+    container_name: postgres_users
+    restart: always
+    networks:
+      dev:
+    volumes:
+      - pg_data_users:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${USERS_DB_NAME:-postgres}
+      POSTGRES_USER: ${USERS_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${USERS_DB_PASSWORD:-postgres}
+    env_file:
+      - ./users/.env.users
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${USERS_DB_USER:-postgres} -d ${USERS_DB_NAME:-postgres}'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  app_users:
+    build:
+      context: ./users/
+      dockerfile: Dockerfile
+    container_name: app_users
+    networks:
+      dev:
+    env_file:
+      - ./users/.env.users
+    depends_on:
+      db_users:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./users/:/code
+
+  db_video:
+    image: postgres:15.1-alpine
+    container_name: postgres_video
+    restart: always
+    networks:
+      dev:
+    volumes:
+      - pg_data_video:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${VIDEO_DB_NAME:-postgres}
+      POSTGRES_USER: ${VIDEO_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${VIDEO_DB_PASSWORD:-postgres}
+    env_file:
+      - ./video/.env.video
+    ports:
+      - "5433:5432"
+    expose:
+      - "5433"
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${VIDEO_DB_USER:-postgres} -d ${VIDEO_DB_NAME:-postgres}'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  app_video:
+    build:
+      context: ./video/
+      dockerfile: Dockerfile
+    container_name: app_video
+    networks:
+      dev:
+    env_file:
+      - ./video/.env.video
+    depends_on:
+      db_video:
+        condition: service_healthy
+      # redis_cache:
+      #   condition: service_healthy
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./video/:/code
+
+
+  # redis_cache:
+  #   image: redis:7.2-rc2
+  #   container_name: redis
+  #   networks:
+  #     dev:
+  #   environment:
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD}
+  #   volumes:
+  #     - ./video/redis/redis.conf:/usr/local/etc/redis/redis.conf
+  #   command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+  #   restart: on-failure
+  #   env_file:
+  #     - ./video/.env
+  #   expose:
+  #     - "6379"
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "redis-cli", "ping" ]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 3
+
+  # rabbitmq_queue:
+  #   image: rabbitmq:latest
+  #   hostname: ${RABBITMQ_HOSTNAME}
+  #   container_name: rabbitmq
+  #   restart: always
+  #   networks:
+  #     dev:
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+  #     - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+  #     - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  #   env_file:
+  #     - ./video/.env
+  #   expose:
+  #     - "15672"
+  #     - "5672"
+  #   healthcheck:
+  #     test: [ "CMD", "rabbitmqctl", "status" ]
+  #     interval: 15s
+  #     timeout: 10s
+  #     retries: 3
+
+
+  # celery_worker:
+  #   build:
+  #     dockerfile: ./video/Dockerfile
+  #   container_name: celery_worker
+  #   command: celery -A src.tasks.tasks:celery worker --loglevel=info
+  #   networks:
+  #     dev:
+  #   volumes:
+  #     - ./video/:/code
+  #   environment:
+  #     - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+  #     - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+  #   env_file:
+  #     - ./video/.env
+  #   depends_on:
+  #     rabbitmq_queue:
+  #       condition: service_healthy
+  #     redis_cache:
+  #       condition: service_healthy

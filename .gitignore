@@ -1,0 +1,9 @@
+.idea
+.venv
+.env
+certs
+__pycache__
+.env.video
+.env.users
+media
+.ruff_cache
