@@ -1,0 +1,111 @@
+version: '3.9'
+
+volumes:
+  keycloak_data:
+
+networks:
+  dev-network-users:
+    name: dev-youtube
+    external: true
+
+services:
+  app_users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_users
+    restart: unless-stopped
+    networks:
+      - dev-network-users
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/code
+
+  keycloack:
+    image: quay.io/keycloak/keycloak:24.0.1
+    # build:
+    #   context: ./keycloak/
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - REALM_NAME=${REALM_NAME}
+    #     - IMPORT_PATH_REALM=${IMPORT_PATH_REALM}
+    #     - KEYCLOAK_CONFIG_DIR=${KEYCLOAK_CONFIG_DIR}
+    restart: unless-stopped
+    environment:
+      KC_DB: ${KC_DB_VENDOR}
+      KC_DB_URL: ${KC_DB_URL}
+      KC_DB_USERNAME: ${DB_USER}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_DB_SCHEMA: ${KC_DB_SCHEMA}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HEALTH_ENABLED: true
+    command: start-dev
+    env_file:
+      - .env
+    networks:
+      - dev-network-users
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+
+
+  keycloak_db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data/
+    networks:
+      - dev-network-users
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${DB_NAME} -U $${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # db_users:
+  #   image: postgres:15.1-alpine
+  #   container_name: postgres_users
+  #   restart: always
+  #   networks:
+  #     dev:
+  #   volumes:
+  #     - pg_data_users:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_DB: ${DB_NAME:-postgres}
+  #     POSTGRES_USER: ${DB_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "5432:5432"
+  #   expose:
+  #     - "5432"
+
+#     healthcheck:
+#       test:
+#         [
+#           "CMD-SHELL",
+#           "sh -c 'pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres}'"
+#         ]
+#       interval: 10s
+#       timeout: 3s
+#       retries: 3

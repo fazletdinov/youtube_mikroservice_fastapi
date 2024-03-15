@@ -1,0 +1,9 @@
+FROM quay.io/keycloak/keycloak:24.0.1
+
+ARG REALM_NAME
+ARG IMPORT_PATH_REALM
+ARG KEYCLOAK_CONFIG_DIR
+
+COPY ${KEYCLOAK_CONFIG_DIR}${REALM_NAME} ${IMPORT_PATH_REALM}${REALM_NAME}
+
+CMD ["start-dev", "--import-realm"]

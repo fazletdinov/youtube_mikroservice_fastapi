@@ -4,14 +4,14 @@ from typing import Any, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import SecretStr
-from redis import asyncio as aioredis
-from redis.backoff import ExponentialBackoff
-from redis.exceptions import BusyLoadingError, ConnectionError, TimeoutError
-from redis.retry import Retry
+from redis import asyncio as aioredis  # type: ignore
+from redis.backoff import ExponentialBackoff  # type: ignore
+from redis.exceptions import BusyLoadingError, ConnectionError, TimeoutError  # type: ignore
+from redis.retry import Retry  # type: ignore
 
 from video.core.config import settings
 
-JSON_TYPE = TypeVar("JSON_TYPE", bound=json)
+JSON_TYPE = TypeVar("JSON_TYPE", bound=json)  # type: ignore
 KEY_STR = TypeVar("KEY_STR", bound=str)
 
 

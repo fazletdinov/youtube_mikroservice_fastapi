@@ -1,5 +1,4 @@
-__all__ = ["Base", "Video", "Comment"]
+__all__ = ["Base", "Video"]
 
 from .base import Base
 from .video import Video
-from .comment import Comment

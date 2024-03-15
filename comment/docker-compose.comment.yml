@@ -1,0 +1,56 @@
+version: '3.9'
+
+volumes:
+  pg_data_comment:
+
+networks:
+  dev-youtube-comment:
+    name: dev-youtube
+    external: true
+
+services:
+  db_comment:
+    image: postgres:15.1-alpine
+    container_name: postgres_users
+    restart: always
+    networks:
+      - dev-youtube-comment
+    volumes:
+      - pg_data_comment:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  app_comment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_comment
+    networks:
+      - dev-youtube-comment
+    env_file:
+      - .env
+    depends_on:
+      db_comment:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/code

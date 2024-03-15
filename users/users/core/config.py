@@ -12,6 +12,8 @@ class AppSettings(BaseSettings):
     app_name: str = "Проект Youtube"
     API_V1_STR: str = "/api/v1/"
 
+    model_config = SettingsConfigDict(extra="ignore")
+
 
 class DBSettings(BaseSettings):
     host: str
@@ -21,9 +23,7 @@ class DBSettings(BaseSettings):
     password: SecretStr
     echo: bool = True
 
-    model_config = SettingsConfigDict(
-        env_prefix="users_db_", env_file=BASE_DIR / ".env"
-    )
+    model_config = SettingsConfigDict(env_prefix="db_", env_file=BASE_DIR / ".env", extra="ignore")
 
     def _url(self) -> str:
         return (
@@ -46,7 +46,7 @@ class TokenAuthSettings(BaseSettings):
     private_key_path: Path = BASE_DIR / "users" / "certs" / "jwt-private.pem"
     public_key_path: Path = BASE_DIR / "users" / "certs" / "jwt-public.pem"
 
-    model_config = SettingsConfigDict(env_prefix="token_", env_file=BASE_DIR / ".env")
+    model_config = SettingsConfigDict(env_prefix="token_", env_file=BASE_DIR / ".env", extra="ignore")
 
 
 class Settings:
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     import os
     from pathlib import Path
 
-    print(Path(os.path.abspath("users")))
+    print(Path(__name__).parent.parent.parent)

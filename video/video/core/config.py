@@ -20,9 +20,7 @@ class DBSettings(BaseSettings):
     password: SecretStr
     echo: bool = True
 
-    model_config = SettingsConfigDict(
-        env_prefix="video_db_", env_file=BASE_DIR / ".env"
-    )
+    model_config = SettingsConfigDict(env_prefix="db_", env_file=BASE_DIR / ".env", extra="ignore")
 
     def _url(self) -> str:
         return (
@@ -50,7 +48,7 @@ class RedisDBSettings(BaseSettings):
     def backend_url(self):
         return self._url()
 
-    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_prefix="redis_")
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_prefix="redis_", extra="ignore")
 
 
 class RabbitmqSettings(BaseSettings):
@@ -63,18 +61,13 @@ class RabbitmqSettings(BaseSettings):
     vhost: str
 
     def _url(self) -> str:
-        return (
-            f"amqp://{self.user}:{self.password.get_secret_value()}@"
-            f"{self.host}:{self.port1}/{self.vhost}"
-        )
+        return f"amqp://{self.user}:{self.password.get_secret_value()}@" f"{self.host}:{self.port1}/{self.vhost}"
 
     @property
     def broker_url(self):
         return self._url()
 
-    model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env", env_prefix="rabbitmq_"
-    )
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_prefix="rabbitmq_", extra="ignore")
 
 
 class Settings:
