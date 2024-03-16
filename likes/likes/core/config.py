@@ -9,7 +9,7 @@ BASE_DIR = Path(__name__).parent.parent.parent
 
 class AppSettings(BaseSettings):
     app_name: str = "Mikroservice Likes"
-    API_V1_STR: str = "/api/v1/"
+    API_V1_STR: str = "/api/v1"
 
 
 class DBSettings(BaseSettings):

@@ -37,7 +37,7 @@ class DDHelper:
             await scoped_factory.remove()
 
 
-dh_helper = DDHelper(
+db_helper = DDHelper(
     url=settings.db.async_url,
     echo=settings.db.echo,
 )

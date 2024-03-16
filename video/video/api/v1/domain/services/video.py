@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from video.api.v1.domain.repository.video import VideoDAL
-from video.database.session import dh_helper
+from video.database.session import db_helper
 from video.api.v1.schemas.video import CreateVideoSchema, UpdateVideoSchema
 from video.api.v1.tasks.tasks import write_image, write_video
 
@@ -86,6 +86,6 @@ class VideoService(VideoServiceBase):
 
 
 async def get_service_video(
-    session: AsyncSession = Depends(dh_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ) -> VideoService:
     return VideoService(session)

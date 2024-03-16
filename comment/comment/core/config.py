@@ -9,7 +9,9 @@ BASE_DIR = Path(__name__).parent.parent.parent
 
 class AppSettings(BaseSettings):
     app_name: str = "Проект Youtube"
-    API_V1_STR: str = "/api/v1/"
+    API_V1_STR: str = "/api/v1"
+
+    model_config = SettingsConfigDict(extra="ignore")
 
 
 class DBSettings(BaseSettings):
@@ -20,7 +22,7 @@ class DBSettings(BaseSettings):
     password: SecretStr
     echo: bool = True
 
-    model_config = SettingsConfigDict(env_prefix="db_", env_file=BASE_DIR / ".env")
+    model_config = SettingsConfigDict(env_prefix="db_", env_file=BASE_DIR / ".env", extra="ignore")
 
     def _url(self) -> str:
         return (
@@ -34,27 +36,28 @@ class DBSettings(BaseSettings):
         return self._url()
 
 
-class RedisDBSettings(BaseSettings):
-    host: str
-    port: int
-    password: SecretStr
-    expire_in_sec: int
-    retry: int
+# class RedisDBSettings(BaseSettings):
+#     host: str
+#     port: int
+#     password: SecretStr
+#     expire_in_sec: int
+#     retry: int
 
-    def _url(self):
-        return f"redis://:{self.password.get_secret_value()}@{self.host}:{self.port}/0"
+#     def _url(self):
+#         return f"redis://:{self.password.get_secret_value()}@{self.host}:{self.port}/0"
 
-    @property
-    def backend_url(self):
-        return self._url()
+#     @property
+#     def backend_url(self):
+#         return self._url()
 
-    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_prefix="redis_")
+#     model_config = SettingsConfigDict(
+#         env_file=BASE_DIR / ".env", env_prefix="redis_", extra="ignore")
 
 
 class Settings:
     app: AppSettings = AppSettings()
     db: DBSettings = DBSettings()
-    redis: RedisDBSettings = RedisDBSettings()
+    # redis: RedisDBSettings = RedisDBSettings()
 
 
 @lru_cache

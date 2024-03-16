@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from users.api.v1.domain.repository.user import UserDAL
 from users.database.models.user import User
-from users.database.session import dh_helper
+from users.database.session import db_helper
 from users.api.v1.schemas.user import CreateUserSchema, ResponseUserSchema, UpdateUserSchema
 from users.api.v1.domain.services.auth_token import TokenManager, get_token_manager
 
@@ -121,7 +121,7 @@ class AuthService(AuthServiceBase, HashManagerBase):
 
 
 async def get_auth_service(
-    session: AsyncSession = Depends(dh_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
     token_manager: TokenManager = Depends(get_token_manager),
 ) -> AuthService:
     return AuthService(session, token_manager)

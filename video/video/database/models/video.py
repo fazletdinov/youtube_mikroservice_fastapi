@@ -15,7 +15,7 @@ class Video(Base):
         DateTime, default=datetime.now(timezone.utc), server_default=func.now()
     )
     image: Mapped[str]
-    comments_id: Mapped[list[UUID]]
+    comment_id: Mapped[UUID]
 
     def __repr__(self) -> str:
         return f"Video - ({self.id}, {self.title})"

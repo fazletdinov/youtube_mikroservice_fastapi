@@ -8,7 +8,7 @@ BASE_DIR = Path(__name__).parent.parent.parent
 
 
 class AppSettings(BaseSettings):
-    app_name: str = "Проект Youtube"
+    app_name: str = "Microservice video"
     API_V1_STR: str = "/api/v1/"
 
 

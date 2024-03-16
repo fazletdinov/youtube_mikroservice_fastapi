@@ -26,8 +26,6 @@ services:
       - .env
     ports:
       - "5433:5432"
-    expose:
-      - "5433"
 
     healthcheck:
       test:

@@ -8,7 +8,7 @@
 USERS_COMPOSE_FILE := users/docker-compose.users.yml
 VIDEO_COMPOSE_FILE := video/docker-compose.video.yml
 LIKES_COMPOSE_FILE := likes/docker-compose.likes.yml
-COMMENT_COMPOSE_FILE := comment/docker-compose.likes.yml
+COMMENT_COMPOSE_FILE := comment/docker-compose.comment.yml
 CHAT_COMPOSE_FILE := chat/docker-compose.chat.yml
 
 DOCKER_COMPOSE_CMD := docker compose

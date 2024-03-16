@@ -9,7 +9,7 @@ BASE_DIR = Path(os.path.abspath("users")).parent
 
 
 class AppSettings(BaseSettings):
-    app_name: str = "Проект Youtube"
+    app_name: str = "Microservice users"
     API_V1_STR: str = "/api/v1/"
 
     model_config = SettingsConfigDict(extra="ignore")
